@@ -1,0 +1,8 @@
+## Title: Can I Horn?
+## Author: MissBizz
+## Description: Let's you know if it is safe to warhorn!
+## APIVersion: 100022
+## SavedVariables: CanIHornSavedVariables
+
+CanIHorn.xml
+CanIHorn.lua
