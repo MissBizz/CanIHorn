@@ -41,12 +41,12 @@ end
 local function IsHornOn(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitID, abilityId, sourceUnitType)
 
     if changeType == EFFECT_RESULT_GAINED then
-        d("YAY Warhorn ID is", effectName, abilityId, unitTag)
+        --d("YAY Warhorn ID is", effectName, abilityId, unitTag)
         CanIHornIndicatorText:SetText("Warhorn is Active")
         CanIHornIndicatorText:SetColor(1, 0, 0, 1)
     end
     if changeType == EFFECT_RESULT_FADED then
-        d("warhorn expired", effectName, abilityId, unitTag)
+        --d("warhorn expired", effectName, abilityId, unitTag)
         CanIHornIndicatorText:SetText("Warhorn not Active")
         CanIHornIndicatorText:SetColor(0, 1, 0, 1)
     end
@@ -66,8 +66,8 @@ function CanIHorn:RegisterFilterAbilities()
     end
 end
 
-function PlayerInWorld()
-    d("it worked!")
+local function PlayerInWorld()
+    --d("it worked!")
 end
 ----------------------------------------------------------
 -- Initialize Function  --
@@ -87,11 +87,6 @@ function CanIHorn:Initialize()
 
 	self:RegisterFilterAbilities()
 end
-
-
---------
-
-
 
 
 ----------------------------------------------------------
