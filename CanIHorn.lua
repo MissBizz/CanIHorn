@@ -4,7 +4,7 @@ CanIHorn = {}
 --  Initialize Variables  --
 ----------------------------------------------------------
 CanIHorn.name = "CanIHorn"
-CanIHorn.version = "0.1.1"
+CanIHorn.version = "0.1.0"
 
 ----------------------------------------------------------
 -- Graphic Stuff  --
@@ -46,7 +46,7 @@ function CanIHorn:RegisterFilterAbilities()
     for i=1, #hornID do
         local eventName = self.name .. i
         EVENT_MANAGER:RegisterForEvent(eventName, EVENT_EFFECT_CHANGED, self.IsHornOn)
-        EVENT_MANAGER:AddFilterForEvent(eventName, EVENT_EFFECT_CHANGED, REGISTER_FILTER_ABILITY_ID, hornID[i])
+        EVENT_MANAGER:AddFilterForEvent(eventName, EVENT_EFFECT_CHANGED, REGISTER_FILTER_ABILITY_ID, hornID[i], REGISTER_FILTER_UNIT_TAG_PREFIX, "group")
     end
 end
 
@@ -81,12 +81,12 @@ end
 function CanIHorn.IsHornOn(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitID, abilityId, sourceUnitType)
 
     if changeType == EFFECT_RESULT_GAINED then
-        d("YAY Warhorn ID is" effectName, abilityId)
+        --d("YAY Warhorn ID is", effectName, abilityId, unitTag)
         CanIHornIndicatorText:SetText("Warhorn is Active")
         CanIHornIndicatorText:SetColor(1, 0, 0, 1)
     end
     if changeType == EFFECT_RESULT_FADED then
-        d("warhorn expired" effectName, abilityId)
+        --d("warhorn expired", effectName, abilityId, unitTag)
         CanIHornIndicatorText:SetText("Warhorn not Active")
         CanIHornIndicatorText:SetColor(0, 1, 0, 1)
     end
