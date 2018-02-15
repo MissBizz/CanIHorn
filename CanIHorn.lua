@@ -27,13 +27,13 @@ CAN_I_HORN = addon
 local function IsHornOn(_, changeType, _, _, unitTag, _, _, _, _, _, _, _, _, _, _, abilityId, _)
 
     if changeType == EFFECT_RESULT_GAINED then
-        d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
+        --d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
         CanIHornIndicatorText:SetText("Warhorn is Active")
         CanIHornIndicatorText:SetColor(1, 0, 0, 1)
         return
     end
 
-    d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
+    --d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
     CanIHornIndicatorText:SetText("Warhorn not Active")
     CanIHornIndicatorText:SetColor(0, 1, 0, 1)
 end
