@@ -1,6 +1,5 @@
 <GuiXml>
     <Controls>
-
         <!-- All visual stuff from the addon is here -->
         <TopLevelControl name="CanIHornIndicator" clampedToScreen="true" mouseEnabled="true" movable="true">
             <!-- Sets dimension for top level control -->
@@ -9,7 +8,7 @@
             Y is vertical (negative up, positive down). -->
             <Anchor point="BOTTOM" relativeTo="GuiRoot" relativePoint="CENTER" offsetY="-20" />
             <OnMoveStop>
-                CanIHorn.OnIndicatorMoveStop()
+                CAN_I_HORN.OnIndicatorMoveStop()
             </OnMoveStop>
             <!-- makes it so our function to save where we drag the text to runs  -->
 
