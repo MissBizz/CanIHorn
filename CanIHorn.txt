@@ -4,5 +4,5 @@
 ## APIVersion: 100022
 ## SavedVariables: CanIHornSavedVariables
 
-CanIHorn.xml
 CanIHorn.lua
+CanIHorn.xml
