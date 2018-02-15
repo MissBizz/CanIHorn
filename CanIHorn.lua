@@ -4,7 +4,7 @@ CanIHorn = {}
 --  Initialize Variables  --
 ----------------------------------------------------------
 CanIHorn.name = "CanIHorn"
-CanIHorn.version = "0.1.2"
+CanIHorn.version = "0.1.1"
 
 ----------------------------------------------------------
 -- Graphic Stuff  --
