@@ -1,6 +1,6 @@
 local addon = {
     name = "CanIHorn",
-    version = "0.1.2",
+    version = "0.2.0",
 }
 
 local savedVariables
@@ -28,7 +28,7 @@ CAN_I_HORN = addon
 local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _, _, _, _, _, abilityId, _)
 
     if changeType == EFFECT_RESULT_GAINED then
-        d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
+        --d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
         CanIHornIndicatorText:SetText("Warhorn is Active")
         CanIHornIndicatorText:SetColor(1, 0, 0, 1)
         return
@@ -37,7 +37,7 @@ local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _,
     --d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
     CanIHornIndicatorText:SetText("Warhorn not Active")
     CanIHornIndicatorText:SetColor(0, 1, 0, 1)
-    d(string.format("IsHornOn() other effectName %s, abilityId %s, unitTag %s, changeType $s", effectName, abilityId, unitTag, changeType))
+    --d(string.format("IsHornOn() other effectName %s, abilityId %s, unitTag %s, changeType $s", effectName, abilityId, unitTag, changeType))
 end
 --------------------------------------------------
 -- Warhorn ID's  --
@@ -63,13 +63,13 @@ local function CheckForHorn()
         if hornID[abilityID] then
             CanIHornIndicatorText:SetText("Warhorn is Active")
             CanIHornIndicatorText:SetColor(1, 0, 0, 1)
-            d(string.format("CheckForHorn() It is it buffName: %s, abilityId %s, buffSlot %s", buffName, abilityID, buffSlot))
+            --d(string.format("CheckForHorn() It is it buffName: %s, abilityId %s, buffSlot %s", buffName, abilityID, buffSlot))
             return end
 
 
             CanIHornIndicatorText:SetText("Warhorn not Active")
             CanIHornIndicatorText:SetColor(0, 1, 0, 1)
-            d(string.format("CheckForHorn() Not it buffName: %s, abilityId %s, buffSlot %s", buffName, abilityID, buffSlot))
+            --d(string.format("CheckForHorn() Not it buffName: %s, abilityId %s, buffSlot %s", buffName, abilityID, buffSlot))
 
     end
 end
