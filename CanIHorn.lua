@@ -25,7 +25,7 @@ CAN_I_HORN = addon
 ----------------------------------------------------------
 local function WatchForce(_, changeType, _, effectName, unitTag, _, _, _, _, _, _, _, _, _, _, abilityId, _)
     if changeType == EFFECT_RESULT_FADED then
-    CanIHornIndicatorText:SetColor(0, 1, 1, 1)
+        CanIHornIndicatorText:SetColor(1, 1, 0, 1)
         EVENT_MANAGER:UnregisterForEvent(forceevent, EVENT_EFFECT_CHANGED)
     end
 end
@@ -70,20 +70,22 @@ end
 
 
 local function CheckForHorn()
+    local isActiveHorn = false
 
     for i=1,GetNumBuffs("player") do
-        local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, buffEffectType, abilityType, statusEffectType, abilityID, canClickOff, castByPlayer = GetUnitBuffInfo("player", i)
-        if hornID[abilityID] then
-            CanIHornIndicatorText:SetText("Warhorn is Active")
-            CanIHornIndicatorText:SetColor(1, 0, 0, 1)
-            --d(string.format("CheckForHorn() It is it buffName: %s, abilityId %s, buffSlot %s", buffName, abilityID, buffSlot))
-            return end
-
-
-            CanIHornIndicatorText:SetText("Warhorn not Active")
-            CanIHornIndicatorText:SetColor(0, 1, 0, 1)
-            --d(string.format("CheckForHorn() Not it buffName: %s, abilityId %s, buffSlot %s", buffName, abilityID, buffSlot))
-
+        local abilityId = select(11, GetUnitBuffInfo("player", i))
+            if hornID[abilityID] then
+                isActiveHorn = true
+                    break
+            end
+    end
+    if isActiveHorn then
+        CanIHornIndicatorText:SetText("Warhorn is Active")
+        CanIHornIndicatorText:SetColor(1, 0, 0, 1)
+        --d(string.format("CheckForHorn() It is it buffName: %s, abilityId %s, buffSlot %s", buffName, abilityID, buffSlot))
+    else
+        CanIHornIndicatorText:SetText("Warhorn not Active")
+        CanIHornIndicatorText:SetColor(0, 1, 0, 1)
     end
 end
 
