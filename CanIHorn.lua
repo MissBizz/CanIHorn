@@ -1,6 +1,6 @@
 local addon = {
     name = "CanIHorn",
-    version = "0.2.0",
+    version = "0.2.1",
 }
 
 local savedVariables
@@ -23,6 +23,18 @@ CAN_I_HORN = addon
 ----------------------------------------------------------
 -- Main Functions  --
 ----------------------------------------------------------
+local function WatchForce(_, changeType, _, effectName, unitTag, _, _, _, _, _, _, _, _, _, _, abilityId, _)
+    if changeType == EFFECT_RESULT_FADED then
+    CanIHornIndicatorText:SetColor(0, 1, 1, 1)
+        EVENT_MANAGER:UnregisterForEvent(forceevent, EVENT_EFFECT_CHANGED)
+    end
+end
+
+
+  local function RegisterForce()
+    EVENT_MANAGER:RegisterForEvent(forceevent, EVENT_EFFECT_CHANGED, WatchForce)
+    EVENT_MANAGER:AddFilterForEvent(forceevent, EVENT_EFFECT_CHANGED, REGISTER_FILTER_ABILITY_ID, 40225, REGISTER_FILTER_UNIT_TAG_PREFIX, "group")
+end
 
 -- (_, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitID, abilityId, sourceUnitType)
 local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _, _, _, _, _, abilityId, _)
@@ -31,6 +43,7 @@ local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _,
         --d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
         CanIHornIndicatorText:SetText("Warhorn is Active")
         CanIHornIndicatorText:SetColor(1, 0, 0, 1)
+        RegisterForce()
         return
     end
 
