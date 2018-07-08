@@ -1,6 +1,8 @@
+local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
+
 local addon = {
     name = "CanIHorn",
-    version = "0.2.1",
+    version = "1.0.0",
 }
 
 local savedVariables
@@ -27,18 +29,19 @@ CAN_I_HORN = addon
 ----------------------------------------------------------
 
 --this sets horn to false, so that if a horn hasn't sounded - major force will be ignored.
-local WarhornActive = false
+local ForceHornActive = false
 
 local function WatchForce(_, changeType, _, effectName, unitTag, _, _, _, _, _, _, _, _, _, _, abilityId, _)
-    --if Warhorn hasn't sounded yet, WarhornActive will be false and therefore nothing will happen, lua assumes you mean you want the variable true
-    if WarhornActive then
+
+    --if Warhorn hasn't sounded yet, ForceHornActive will be false and therefore nothing will happen, lua assumes you mean you want the variable true
+    if ForceHornActive then
 
         --d(string.format("Passed warhorn true check"))
 
         if changeType == EFFECT_RESULT_FADED then
             CanIHornIndicatorText:SetColor(1, 1, 0, 1)
             --this changed the text colour to yellow when major force fades
-            WarhornActive = false
+            ForceHornActive = false
             --sets warhornActive back to false so other major forces don't change the colour
         end
    end
@@ -58,7 +61,7 @@ local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _,
         CanIHornIndicatorText:SetColor(1, 0, 0, 1)
             --checks only for aggressive horn, as that is the only time we care about major force
             if abilityId == 40224 then
-                WarhornActive = true
+                ForceHornActive = true
         --d(string.format("WarhornActive set to true"))
                 --sets WarhornActive to true to it will pass the check in the WatchForce function
             end
