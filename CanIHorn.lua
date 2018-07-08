@@ -1,5 +1,3 @@
-local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
-
 local addon = {
     name = "CanIHorn",
     version = "1.0.0",
