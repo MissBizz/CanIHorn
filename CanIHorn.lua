@@ -1,6 +1,6 @@
 local addon = {
     name = "CanIHorn",
-    version = "1.0.0",
+    version = "1.1.0",
 }
 
 local savedVariables
@@ -34,7 +34,7 @@ local function WatchForce(_, changeType, _, effectName, unitTag, _, _, _, _, _, 
     --if Warhorn hasn't sounded yet, ForceHornActive will be false and therefore nothing will happen, lua assumes you mean you want the variable true
     if ForceHornActive then
 
-        --d(string.format("Passed warhorn true check"))
+        --d(string.format("Passed agressive warhorn true check"))
 
         if changeType == EFFECT_RESULT_FADED then
             CanIHornIndicatorText:SetColor(1, 1, 0, 1)
@@ -52,9 +52,10 @@ end
 -- (_, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitID, abilityId, sourceUnitType)
 --This is our main function to change text when a warhorn fires or fades.
 local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _, _, _, _, _, abilityId, _)
-
+    local nearbyHorn = IsUnitInGroupSupportRange(unitTag)
     if changeType == EFFECT_RESULT_GAINED then
-        --d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
+        if nearbyHorn then
+            --d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
         CanIHornIndicatorText:SetText("Warhorn is Active")
         CanIHornIndicatorText:SetColor(1, 0, 0, 1)
             --checks only for aggressive horn, as that is the only time we care about major force
@@ -64,6 +65,7 @@ local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _,
                 --sets WarhornActive to true to it will pass the check in the WatchForce function
             end
         return
+    end
     end
 
     --d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
