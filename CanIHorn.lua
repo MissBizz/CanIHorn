@@ -1,6 +1,6 @@
 local addon = {
     name = "CanIHorn",
-    version = "1.1.0",
+    version = "1.1.1",
 }
 
 local savedVariables
@@ -20,7 +20,22 @@ end
 
 CAN_I_HORN = addon
 
+----------------------------------------------------------
+-- Display Functions  --
+----------------------------------------------------------
+local function HornActiveDisplay()
+    CanIHornIndicatorText:SetText("Warhorn is Active")
+    CanIHornIndicatorText:SetColor(1, 0, 0, 1)
+end
 
+local function HornInactiveDisplay()
+    CanIHornIndicatorText:SetText("Warhorn not Active")
+    CanIHornIndicatorText:SetColor(0, 1, 0, 1)
+end
+
+local function ForceInactiveDisplay()
+    CanIHornIndicatorText:SetColor(1, 1, 0, 1)
+end
 
 ----------------------------------------------------------
 -- Major Force Functions  --
@@ -37,7 +52,7 @@ local function WatchForce(_, changeType, _, effectName, unitTag, _, _, _, _, _, 
         --d(string.format("Passed agressive warhorn true check"))
 
         if changeType == EFFECT_RESULT_FADED then
-            CanIHornIndicatorText:SetColor(1, 1, 0, 1)
+            ForceInactiveDisplay()
             --this changed the text colour to yellow when major force fades
             ForceHornActive = false
             --sets warhornActive back to false so other major forces don't change the colour
@@ -56,21 +71,19 @@ local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _,
     if changeType == EFFECT_RESULT_GAINED then
         if nearbyHorn then
             --d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
-        CanIHornIndicatorText:SetText("Warhorn is Active")
-        CanIHornIndicatorText:SetColor(1, 0, 0, 1)
+            HornActiveDisplay()
             --checks only for aggressive horn, as that is the only time we care about major force
-            if abilityId == 40224 then
-                ForceHornActive = true
-        --d(string.format("WarhornActive set to true"))
-                --sets WarhornActive to true to it will pass the check in the WatchForce function
-            end
-        return
-    end
+                if abilityId == 40224 then
+                    ForceHornActive = true
+                    --d(string.format("WarhornActive set to true"))
+                    --sets WarhornActive to true to it will pass the check in the WatchForce function
+                end
+            return
+        end
     end
 
     --d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
-    CanIHornIndicatorText:SetText("Warhorn not Active")
-    CanIHornIndicatorText:SetColor(0, 1, 0, 1)
+    HornInactiveDisplay()
 
     --d(string.format("IsHornOn() other effectName %s, abilityId %s, unitTag %s, changeType $s", effectName, abilityId, unitTag, changeType))
 end
@@ -116,12 +129,10 @@ local function CheckForHorn()
             end
     end
     if isActiveHorn then
-        CanIHornIndicatorText:SetText("Warhorn is Active")
-        CanIHornIndicatorText:SetColor(1, 0, 0, 1)
+        HornActiveDisplay()
         --d(string.format("CheckForHorn() It is it buffName: %s, abilityId %s, buffSlot %s", buffName, abilityID, buffSlot))
     else
-        CanIHornIndicatorText:SetText("Warhorn not Active")
-        CanIHornIndicatorText:SetColor(0, 1, 0, 1)
+        HornInactiveDisplay()
     end
 end
 
