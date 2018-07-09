@@ -1,6 +1,16 @@
+-------------------------------------------------------------------------------------------------
+--  Libraries --
+-------------------------------------------------------------------------------------------------
+local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
+
+-------------------------------------------------------------------------------------------------
+--  Addon Info --
+-------------------------------------------------------------------------------------------------
+
 local addon = {
     name = "CanIHorn",
     version = "1.1.1",
+    author = "MissBizz"
 }
 
 local savedVariables
@@ -8,6 +18,12 @@ local savedVariables
 ----------------------------------------------------------
 --  GLOBALS / GUI  --
 ----------------------------------------------------------
+local DisplayDefaults = {
+    HornActiveColour = {1, 0, 0, 1},
+    HornInactiveColour = {0, 1, 0, 1},
+    ForceInactiveColour = {1, 1, 0, 1},
+}
+
 function addon.OnIndicatorMoveStop()
     savedVariables.left = CanIHornIndicator:GetLeft()
     savedVariables.top = CanIHornIndicator:GetTop()
@@ -20,21 +36,83 @@ end
 
 CAN_I_HORN = addon
 
+local function CreateSettingsWindow()
+    local panelData = {
+        type = "panel",
+        name = "Can I Horn?",
+        displayName = "Can I Horn?",
+        author = addon.author,
+        version = addon.version,
+        slashCommand = "/canihorn",
+        registerForRefresh = true,
+        registerForDefaults = true,
+    }
+
+    local cntrlOptionsPanel = LAM2:RegisterAddonPanel("MissBizz_CanIHorn", panelData)
+
+    local optionsData = {
+        [1] = {
+            type = "header",
+            name = "Can I Horn Settings",
+        },
+        [2] = {
+            type = "description",
+            text = "Adjust Can I Horn? for you!",
+        },
+        [3] = {
+            type = "submenu",
+            name = "Colours",
+            tooltip = "Allows you to change colours.",
+            controls = {
+                [1] = {
+                    type = "colorpicker",
+                    name = "Horn Active Color",
+                    tooltip = "Changes the colour of the text when warhorn is active.",
+                    getFunc = function() return unpack(savedVariables.HornActiveColour) end,
+                    setFunc = function(r,g,b,a)
+                        savedVariables.HornActiveColour = { r, g, b, a}
+                    end,
+                },
+                [2] = {
+                    type = "colorpicker",
+                    name = "Horn Not Active Color",
+                    tooltip = "Changes the colour of the text when warhorn is not active.",
+                    getFunc = function() return unpack(savedVariables.HornInactiveColour) end,
+                    setFunc = function(r,g,b,a)
+                        savedVariables.HornInactiveColour = { r, g, b, a}
+                    end,
+                },
+                [3] = {
+                    type = "colorpicker",
+                    name = "Horn Active - No Major Force",
+                    tooltip = "Changes the colour of the text when warhorn is active, but major force is lost. (Does not apply for unmorphed warhorn or sturdy horn)",
+                    getFunc = function() return unpack(savedVariables.ForceInactiveColour) end,
+                    setFunc = function(r,g,b,a)
+                        savedVariables.ForceInactiveColour = { r, g, b, a}
+                    end,
+                },
+            },
+        },
+    }
+
+    LAM2:RegisterOptionControls("MissBizz_CanIHorn", optionsData)
+end
+
 ----------------------------------------------------------
 -- Display Functions  --
 ----------------------------------------------------------
 local function HornActiveDisplay()
     CanIHornIndicatorText:SetText("Warhorn is Active")
-    CanIHornIndicatorText:SetColor(1, 0, 0, 1)
+    CanIHornIndicatorText:SetColor(unpack(savedVariables.HornActiveColour))
 end
 
 local function HornInactiveDisplay()
     CanIHornIndicatorText:SetText("Warhorn not Active")
-    CanIHornIndicatorText:SetColor(0, 1, 0, 1)
+    CanIHornIndicatorText:SetColor(unpack(savedVariables.HornInactiveColour))
 end
 
 local function ForceInactiveDisplay()
-    CanIHornIndicatorText:SetColor(1, 1, 0, 1)
+    CanIHornIndicatorText:SetColor(unpack(savedVariables.ForceInactiveColour))
 end
 
 ----------------------------------------------------------
@@ -154,12 +232,13 @@ local function Initialize()
     --register event to watch for when player loads
     EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 
-    savedVariables = ZO_SavedVars:New("CanIHornSavedVariables", 1, nil, {})
+    savedVariables = ZO_SavedVars:New("CanIHornSavedVariables", 1, nil, DisplayDefaults)
 
     addon.RestorePosition()
 
     RegisterFilterAbilities()
     RegisterForce()
+    CreateSettingsWindow()
 
 
 end
