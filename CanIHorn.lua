@@ -24,8 +24,21 @@ local DisplayDefaults = {
     ForceInactiveColour = {1, 1, 0, 1},
 }
 
+local function UpdateColour()
+    if hornState == "Inactive" then
+        CanIHornIndicatorText:SetColor(unpack(savedVariables.HornInactiveColour))
+
+    elseif hornState == "Active" then
+        CanIHornIndicatorText:SetColor(unpack(savedVariables.HornActiveColour))
+
+    elseif hornState == "ForceInactive" then
+        CanIHornIndicatorText:SetColor(unpack(savedVariables.ForceInactiveColour))
+    end
+end
+
 function addon.OnIndicatorMoveStop()
     savedVariables.left = CanIHornIndicator:GetLeft()
+
     savedVariables.top = CanIHornIndicator:GetTop()
 end
 
@@ -53,45 +66,57 @@ local function CreateSettingsWindow()
     local optionsData = {
         [1] = {
             type = "header",
-            name = "Can I Horn Settings",
+            name = "Warhorn Active",
         },
         [2] = {
             type = "description",
-            text = "Adjust Can I Horn? for you!",
+            text = "When warhorn is active. If using Aggressive horn, these settings will apply when both Aggressive Horn and Major Force are active.",
         },
         [3] = {
-            type = "submenu",
-            name = "Colours",
-            tooltip = "Allows you to change colours.",
-            controls = {
-                [1] = {
-                    type = "colorpicker",
-                    name = "Horn Active Color",
-                    tooltip = "Changes the colour of the text when warhorn is active.",
-                    getFunc = function() return unpack(savedVariables.HornActiveColour) end,
-                    setFunc = function(r,g,b,a)
-                        savedVariables.HornActiveColour = { r, g, b, a}
-                    end,
-                },
-                [2] = {
-                    type = "colorpicker",
-                    name = "Horn Not Active Color",
-                    tooltip = "Changes the colour of the text when warhorn is not active.",
-                    getFunc = function() return unpack(savedVariables.HornInactiveColour) end,
-                    setFunc = function(r,g,b,a)
-                        savedVariables.HornInactiveColour = { r, g, b, a}
-                    end,
-                },
-                [3] = {
-                    type = "colorpicker",
-                    name = "Horn Active - No Major Force",
-                    tooltip = "Changes the colour of the text when warhorn is active, but major force is lost. (Does not apply for unmorphed warhorn or sturdy horn)",
-                    getFunc = function() return unpack(savedVariables.ForceInactiveColour) end,
-                    setFunc = function(r,g,b,a)
-                        savedVariables.ForceInactiveColour = { r, g, b, a}
-                    end,
-                },
-            },
+            type = "colorpicker",
+            name = "Horn Active Color",
+            tooltip = "Changes the colour of the text when warhorn is active.",
+            getFunc = function() return unpack(savedVariables.HornActiveColour) end,
+            setFunc = function(r,g,b,a)
+                savedVariables.HornActiveColour = { r, g, b, a }
+                UpdateColour()
+            end,
+        },
+        [4] = {
+            type = "header",
+            name = "Warhorn Inactive",
+        },
+        [5] = {
+            type = "description",
+            text = "When warhorn is not active.",
+        },
+        [6] = {
+            type = "colorpicker",
+            name = "Horn Not Active Color",
+            tooltip = "Changes the colour of the text when warhorn is not active.",
+            getFunc = function() return unpack(savedVariables.HornInactiveColour) end,
+            setFunc = function(r,g,b,a)
+                savedVariables.HornInactiveColour = { r, g, b, a }
+                UpdateColour()
+            end,
+        },
+        [7] = {
+            type = "header",
+            name = "Warhorn Active, Major Force Inactive",
+        },
+        [8] = {
+            type = "description",
+            text = "When warhorn is active, but Major Force is no longer active. Only applied to Aggressive Horn.",
+        },
+        [9] = {
+            type = "colorpicker",
+            name = "Horn Active - No Major Force",
+            tooltip = "Changes the colour of the text when warhorn is active, but major force is lost. (Does not apply for unmorphed warhorn or sturdy horn)",
+            getFunc = function() return unpack(savedVariables.ForceInactiveColour) end,
+            setFunc = function(r,g,b,a)
+                savedVariables.ForceInactiveColour = { r, g, b, a }
+                UpdateColour()
+            end,
         },
     }
 
@@ -102,16 +127,19 @@ end
 -- Display Functions  --
 ----------------------------------------------------------
 local function HornActiveDisplay()
+    hornState = "Active"
     CanIHornIndicatorText:SetText("Warhorn is Active")
     CanIHornIndicatorText:SetColor(unpack(savedVariables.HornActiveColour))
 end
 
 local function HornInactiveDisplay()
+    hornState = "Inactive"
     CanIHornIndicatorText:SetText("Warhorn not Active")
     CanIHornIndicatorText:SetColor(unpack(savedVariables.HornInactiveColour))
 end
 
 local function ForceInactiveDisplay()
+    hornState = "FoirceInctive"
     CanIHornIndicatorText:SetColor(unpack(savedVariables.ForceInactiveColour))
 end
 
