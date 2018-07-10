@@ -9,7 +9,7 @@ local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
 
 local addon = {
     name = "CanIHorn",
-    version = "1.1.1",
+    version = "1.1.2",
     author = "MissBizz"
 }
 
@@ -139,7 +139,7 @@ local function HornInactiveDisplay()
 end
 
 local function ForceInactiveDisplay()
-    hornState = "FoirceInctive"
+    hornState = "ForceInactive"
     CanIHornIndicatorText:SetColor(unpack(savedVariables.ForceInactiveColour))
 end
 
