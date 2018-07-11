@@ -18,15 +18,26 @@ local savedVariables
 ----------------------------------------------------------
 --  GLOBALS / GUI  --
 ----------------------------------------------------------
+local HornState = ""
+local HornActive = "HornActive"
+local HornInactive = "HornInactive"
+local ForceInactive = "ForceInactive"
+
 local DisplayDefaults = {
-    HornActiveColour = {1, 0, 0, 1},
-    HornInactiveColour = {0, 1, 0, 1},
-    ForceInactiveColour = {1, 1, 0, 1},
+    HornActive = {
+        Colour = {1, 0, 0, 1},
+    },
+    HornInactive = {
+        Colour = {0, 1, 0, 1},
+    },
+    ForceInactive = {
+        Colour = {1, 1, 0, 1},
+    },
 }
-CurrentHornColour = ""
+
 
 local function UpdateColour()
-        CanIHornIndicatorText:SetColor(unpack(savedVariables[CurrentHornColour]))
+        CanIHornIndicatorText:SetColor(unpack(savedVariables[HornState].Colour))
 end
 
 function addon.OnIndicatorMoveStop()
@@ -69,9 +80,9 @@ local function CreateSettingsWindow()
             type = "colorpicker",
             name = "Horn Active Color",
             tooltip = "Changes the colour of the text when warhorn is active.",
-            getFunc = function() return unpack(savedVariables.HornActiveColour) end,
+            getFunc = function() return unpack(savedVariables[HornActive].Colour) end,
             setFunc = function(r,g,b,a)
-                savedVariables.HornActiveColour = { r, g, b, a }
+                savedVariables[HornActive].Colour = { r, g, b, a }
                 UpdateColour()
             end,
         },
@@ -87,9 +98,9 @@ local function CreateSettingsWindow()
             type = "colorpicker",
             name = "Horn Not Active Color",
             tooltip = "Changes the colour of the text when warhorn is not active.",
-            getFunc = function() return unpack(savedVariables.HornInactiveColour) end,
+            getFunc = function() return unpack(savedVariables[HornInactive].Colour) end,
             setFunc = function(r,g,b,a)
-                savedVariables.HornInactiveColour = { r, g, b, a }
+                savedVariables[HornInactive].Colour = { r, g, b, a }
                 UpdateColour()
             end,
         },
@@ -105,9 +116,9 @@ local function CreateSettingsWindow()
             type = "colorpicker",
             name = "Horn Active - No Major Force",
             tooltip = "Changes the colour of the text when warhorn is active, but major force is lost. (Does not apply for unmorphed warhorn or sturdy horn)",
-            getFunc = function() return unpack(savedVariables.ForceInactiveColour) end,
+            getFunc = function() return unpack(savedVariables[ForceInactive].Colour) end,
             setFunc = function(r,g,b,a)
-                savedVariables.ForceInactiveColour = { r, g, b, a }
+                savedVariables[ForceInactive].Colour = { r, g, b, a }
                 UpdateColour()
             end,
         },
@@ -120,20 +131,20 @@ end
 -- Display Functions  --
 ----------------------------------------------------------
 local function HornActiveDisplay()
-    CurrentHornColour = "HornActiveColour"
+    HornState = "HornActive"
     CanIHornIndicatorText:SetText("Warhorn is Active")
-    CanIHornIndicatorText:SetColor(unpack(savedVariables[CurrentHornColour]))
+    CanIHornIndicatorText:SetColor(unpack(savedVariables[HornState].Colour))
 end
 
 local function HornInactiveDisplay()
-    CurrentHornColour = "HornInactiveColour"
+    HornState = "HornInactive"
     CanIHornIndicatorText:SetText("Warhorn not Active")
-    CanIHornIndicatorText:SetColor(unpack(savedVariables[CurrentHornColour]))
+    CanIHornIndicatorText:SetColor(unpack(savedVariables[HornState].Colour))
 end
 
 local function ForceInactiveDisplay()
-    CurrentHornColour = "ForceInactiveColour"
-    CanIHornIndicatorText:SetColor(unpack(savedVariables[CurrentHornColour]))
+    HornState = "ForceInactive"
+    CanIHornIndicatorText:SetColor(unpack(savedVariables[HornState].Colour))
 end
 
 ----------------------------------------------------------
@@ -169,12 +180,12 @@ local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _,
     local nearbyHorn = IsUnitInGroupSupportRange(unitTag)
     if changeType == EFFECT_RESULT_GAINED then
         if nearbyHorn then
-            --d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
+            --d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s effect gained", effectName, abilityId, unitTag))
             HornActiveDisplay()
             --checks only for aggressive horn, as that is the only time we care about major force
                 if abilityId == 40224 then
                     ForceHornActive = true
-                    --d(string.format("WarhornActive set to true"))
+                    --d(string.format("ForceHornActive set to true"))
                     --sets WarhornActive to true to it will pass the check in the WatchForce function
                 end
             return
