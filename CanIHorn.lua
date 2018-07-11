@@ -26,12 +26,15 @@ local ForceInactive = "ForceInactive"
 local DisplayDefaults = {
     HornActive = {
         Colour = {1, 0, 0, 1},
+        Text = "Warhorn is Active"
     },
     HornInactive = {
         Colour = {0, 1, 0, 1},
+        Text = "Warhorn not Active"
     },
     ForceInactive = {
         Colour = {1, 1, 0, 1},
+        Text = "Warhorn is Active"
     },
 }
 
@@ -130,20 +133,8 @@ end
 ----------------------------------------------------------
 -- Display Functions  --
 ----------------------------------------------------------
-local function HornActiveDisplay()
-    HornState = "HornActive"
-    CanIHornIndicatorText:SetText("Warhorn is Active")
-    CanIHornIndicatorText:SetColor(unpack(savedVariables[HornState].Colour))
-end
-
-local function HornInactiveDisplay()
-    HornState = "HornInactive"
-    CanIHornIndicatorText:SetText("Warhorn not Active")
-    CanIHornIndicatorText:SetColor(unpack(savedVariables[HornState].Colour))
-end
-
-local function ForceInactiveDisplay()
-    HornState = "ForceInactive"
+local function HornDisplay()
+    CanIHornIndicatorText:SetText(savedVariables[HornState].Text)
     CanIHornIndicatorText:SetColor(unpack(savedVariables[HornState].Colour))
 end
 
@@ -162,7 +153,8 @@ local function WatchForce(_, changeType, _, effectName, unitTag, _, _, _, _, _, 
         --d(string.format("Passed agressive warhorn true check"))
 
         if changeType == EFFECT_RESULT_FADED then
-            ForceInactiveDisplay()
+            HornState = "ForceInactive"
+            HornDisplay()
             --this changed the text colour to yellow when major force fades
             ForceHornActive = false
             --sets warhornActive back to false so other major forces don't change the colour
@@ -181,7 +173,8 @@ local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _,
     if changeType == EFFECT_RESULT_GAINED then
         if nearbyHorn then
             --d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s effect gained", effectName, abilityId, unitTag))
-            HornActiveDisplay()
+            HornState = "HornActive"
+            HornDisplay()
             --checks only for aggressive horn, as that is the only time we care about major force
                 if abilityId == 40224 then
                     ForceHornActive = true
@@ -193,7 +186,8 @@ local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _,
     end
 
     --d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
-    HornInactiveDisplay()
+    HornState = "HornInactive"
+    HornDisplay()
 
     --d(string.format("IsHornOn() other effectName %s, abilityId %s, unitTag %s, changeType $s", effectName, abilityId, unitTag, changeType))
 end
@@ -239,10 +233,12 @@ local function CheckForHorn()
             end
     end
     if isActiveHorn then
-        HornActiveDisplay()
+        HornState = "HornActive"
+        HornDisplay()
         --d(string.format("CheckForHorn() It is it buffName: %s, abilityId %s, buffSlot %s", buffName, abilityID, buffSlot))
     else
-        HornInactiveDisplay()
+        HornState = "HornInactive"
+        HornDisplay()
     end
 end
 
