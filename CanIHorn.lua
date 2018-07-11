@@ -9,7 +9,7 @@ local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
 
 local addon = {
     name = "CanIHorn",
-    version = "1.1.2",
+    version = "1.2.1",
     author = "MissBizz"
 }
 
@@ -23,17 +23,10 @@ local DisplayDefaults = {
     HornInactiveColour = {0, 1, 0, 1},
     ForceInactiveColour = {1, 1, 0, 1},
 }
+CurrentHornColour = ""
 
 local function UpdateColour()
-    if hornState == "Inactive" then
-        CanIHornIndicatorText:SetColor(unpack(savedVariables.HornInactiveColour))
-
-    elseif hornState == "Active" then
-        CanIHornIndicatorText:SetColor(unpack(savedVariables.HornActiveColour))
-
-    elseif hornState == "ForceInactive" then
-        CanIHornIndicatorText:SetColor(unpack(savedVariables.ForceInactiveColour))
-    end
+        CanIHornIndicatorText:SetColor(unpack(savedVariables[CurrentHornColour]))
 end
 
 function addon.OnIndicatorMoveStop()
@@ -127,20 +120,20 @@ end
 -- Display Functions  --
 ----------------------------------------------------------
 local function HornActiveDisplay()
-    hornState = "Active"
+    CurrentHornColour = "HornActiveColour"
     CanIHornIndicatorText:SetText("Warhorn is Active")
-    CanIHornIndicatorText:SetColor(unpack(savedVariables.HornActiveColour))
+    CanIHornIndicatorText:SetColor(unpack(savedVariables[CurrentHornColour]))
 end
 
 local function HornInactiveDisplay()
-    hornState = "Inactive"
+    CurrentHornColour = "HornInactiveColour"
     CanIHornIndicatorText:SetText("Warhorn not Active")
-    CanIHornIndicatorText:SetColor(unpack(savedVariables.HornInactiveColour))
+    CanIHornIndicatorText:SetColor(unpack(savedVariables[CurrentHornColour]))
 end
 
 local function ForceInactiveDisplay()
-    hornState = "ForceInactive"
-    CanIHornIndicatorText:SetColor(unpack(savedVariables.ForceInactiveColour))
+    CurrentHornColour = "ForceInactiveColour"
+    CanIHornIndicatorText:SetColor(unpack(savedVariables[CurrentHornColour]))
 end
 
 ----------------------------------------------------------
