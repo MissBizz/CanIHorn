@@ -10,8 +10,11 @@ local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
 local addon = {
     name = "CanIHorn",
     version = "1.2.1",
-    author = "MissBizz"
+    author = "MissBizz",
+    DisplayName = "Can I Horn?"
 }
+
+local ChangeLog = "Minor bug fix for ForceInactive colour not updating without reloadui UI. Some code simplication to prepare for more options. Corrected version number"
 
 local savedVariables
 
@@ -36,6 +39,7 @@ local DisplayDefaults = {
         Colour = {1, 1, 0, 1},
         Text = "Warhorn is Active"
     },
+    CurrentVersion = "0"
 }
 
 
@@ -246,6 +250,10 @@ end
 local function OnPlayerActivated()
     --d("it worked!")
     CheckForHorn()
+    if savedVariables.CurrentVersion ~= addon.version then
+        d(string.format(addon.DisplayName .. " - " ..addon.version .. " - " ..ChangeLog))
+        savedVariables.CurrentVersion = addon.version
+    end
 
 end
 
@@ -268,8 +276,9 @@ local function Initialize()
     RegisterForce()
     CreateSettingsWindow()
 
-
 end
+
+
 
 local function OnAddOnLoaded(_, addonName)
 
