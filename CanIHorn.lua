@@ -9,31 +9,56 @@ local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
 
 local addon = {
     name = "CanIHorn",
-    version = "1.1.2",
-    author = "MissBizz"
+    version = "1.2.1",
+    author = "MissBizz",
+    DisplayName = "Can I Horn?"
 }
 
+local ChangeLog = "MOAR OPTIONS! All warhorns states now have options for font/size/outline/colour! See changelog for other tidbits!"
+
 local savedVariables
+
 
 ----------------------------------------------------------
 --  GLOBALS / GUI  --
 ----------------------------------------------------------
+local HornState = ""
+local HornActive = "HornActive"
+local HornInactive = "HornInactive"
+local ForceInactive = "ForceInactive"
+
 local DisplayDefaults = {
-    HornActiveColour = {1, 0, 0, 1},
-    HornInactiveColour = {0, 1, 0, 1},
-    ForceInactiveColour = {1, 1, 0, 1},
+    HornActive = {
+        Colour = {1, 0, 0, 1},
+        Text = "Warhorn is Active",
+        fontName = "Univers67",
+        fontSize = "20",
+        fontOutline = "soft-shadow-thick"
+    },
+    HornInactive = {
+        Colour = {0, 1, 0, 1},
+        Text = "Warhorn not Active",
+        fontName = "Univers67",
+        fontSize = "20",
+        fontOutline = "soft-shadow-thick"
+    },
+    ForceInactive = {
+        Colour = {1, 1, 0, 1},
+        Text = "Warhorn is Active",
+        fontName = "Univers67",
+        fontSize = "20",
+        fontOutline = "soft-shadow-thick"
+    },
+    CurrentVersion = "0"
 }
 
+
 local function UpdateColour()
-    if hornState == "Inactive" then
-        CanIHornIndicatorText:SetColor(unpack(savedVariables.HornInactiveColour))
+        CanIHornIndicatorText:SetColor(unpack(savedVariables[HornState].Colour))
+end
 
-    elseif hornState == "Active" then
-        CanIHornIndicatorText:SetColor(unpack(savedVariables.HornActiveColour))
-
-    elseif hornState == "ForceInactive" then
-        CanIHornIndicatorText:SetColor(unpack(savedVariables.ForceInactiveColour))
-    end
+local function UpdateFont()
+    CanIHornIndicatorText:SetFont("EsoUi/Common/Fonts/"..savedVariables[HornState].fontName..".otf|"..savedVariables[HornState].fontSize.."|"..savedVariables[HornState].fontOutline)
 end
 
 function addon.OnIndicatorMoveStop()
@@ -76,46 +101,154 @@ local function CreateSettingsWindow()
             type = "colorpicker",
             name = "Horn Active Color",
             tooltip = "Changes the colour of the text when warhorn is active.",
-            getFunc = function() return unpack(savedVariables.HornActiveColour) end,
+            getFunc = function() return unpack(savedVariables[HornActive].Colour) end,
             setFunc = function(r,g,b,a)
-                savedVariables.HornActiveColour = { r, g, b, a }
+                savedVariables[HornActive].Colour = { r, g, b, a }
                 UpdateColour()
             end,
         },
         [4] = {
-            type = "header",
-            name = "Warhorn Inactive",
+            type = "dropdown",
+            name = "Font Name",
+            tooltip = "Font Name to be used.",
+            choices = {"Univers57", "Univers67", "Univers57", "FTN47", "FTN57", "FTN87", "ProseAntiquePSMT", "Handwritten_Bold", "TrajanPro-Regular"},
+            getFunc = function() return savedVariables[HornActive].fontName end,
+            setFunc = function(newValue)
+                savedVariables[HornActive].fontName = newValue
+                UpdateFont()
+            end,
         },
         [5] = {
-            type = "description",
-            text = "When warhorn is not active.",
+            type = "slider",
+            name = "Size",
+            tooltip = "Font Size to be used when warhorn is active.",
+            min = 20,
+            max = 72,
+            step = 1,
+            getFunc = function() return savedVariables[HornActive].fontSize end,
+            setFunc = function(newValue2)
+                savedVariables[HornActive].fontSize = newValue2
+                UpdateFont()
+            end,
         },
         [6] = {
-            type = "colorpicker",
-            name = "Horn Not Active Color",
-            tooltip = "Changes the colour of the text when warhorn is not active.",
-            getFunc = function() return unpack(savedVariables.HornInactiveColour) end,
-            setFunc = function(r,g,b,a)
-                savedVariables.HornInactiveColour = { r, g, b, a }
-                UpdateColour()
+            type = "dropdown",
+            name = "Outline",
+            tooltip = "Font Outline to be used.",
+            choices = {"thick-outline", "soft-shadow-thick", "soft-shadow-thin", "none" },
+            getFunc = function() return savedVariables[HornActive].fontOutline or "none" end,
+            setFunc = function(newValue3)
+                if newValue == "none" then newValue3 = nil end
+                savedVariables[HornActive].fontOutline = newValue3
+                UpdateFont()
             end,
         },
         [7] = {
             type = "header",
-            name = "Warhorn Active, Major Force Inactive",
+            name = "Warhorn Inactive",
         },
         [8] = {
             type = "description",
-            text = "When warhorn is active, but Major Force is no longer active. Only applied to Aggressive Horn.",
+            text = "When warhorn is not active.",
         },
         [9] = {
             type = "colorpicker",
+            name = "Horn Not Active Color",
+            tooltip = "Changes the colour of the text when warhorn is not active.",
+            getFunc = function() return unpack(savedVariables[HornInactive].Colour) end,
+            setFunc = function(r,g,b,a)
+                savedVariables[HornInactive].Colour = { r, g, b, a }
+                UpdateColour()
+            end,
+        },
+        [10] = {
+            type = "dropdown",
+            name = "Font Name",
+            tooltip = "Font Name to be used.",
+            choices = {"Univers57", "Univers67", "Univers57", "FTN47", "FTN57", "FTN87", "ProseAntiquePSMT", "Handwritten_Bold", "TrajanPro-Regular"},
+            getFunc = function() return savedVariables[HornInactive].fontName end,
+            setFunc = function(newValue)
+                savedVariables[HornInactive].fontName = newValue
+                UpdateFont()
+            end,
+        },
+        [11] = {
+            type = "slider",
+            name = "Size",
+            tooltip = "Font Size to be used when warhorn is active.",
+            min = 20,
+            max = 72,
+            step = 1,
+            getFunc = function() return savedVariables[HornInactive].fontSize end,
+            setFunc = function(newValue2)
+                savedVariables[HornInactive].fontSize = newValue2
+                UpdateFont()
+            end,
+        },
+        [12] = {
+            type = "dropdown",
+            name = "Outline",
+            tooltip = "Font Outline to be used.",
+            choices = {"thick-outline", "soft-shadow-thick", "soft-shadow-thin", "none" },
+            getFunc = function() return savedVariables[HornInactive].fontOutline or "none" end,
+            setFunc = function(newValue3)
+                if newValue == "none" then newValue3 = nil end
+                savedVariables[HornInactive].fontOutline = newValue3
+                UpdateFont()
+            end,
+        },
+        [13] = {
+            type = "header",
+            name = "Warhorn Active, Major Force Inactive",
+        },
+        [14] = {
+            type = "description",
+            text = "When warhorn is active, but Major Force is no longer active. Only applied to Aggressive Horn.",
+        },
+        [15] = {
+            type = "colorpicker",
             name = "Horn Active - No Major Force",
             tooltip = "Changes the colour of the text when warhorn is active, but major force is lost. (Does not apply for unmorphed warhorn or sturdy horn)",
-            getFunc = function() return unpack(savedVariables.ForceInactiveColour) end,
+            getFunc = function() return unpack(savedVariables[ForceInactive].Colour) end,
             setFunc = function(r,g,b,a)
-                savedVariables.ForceInactiveColour = { r, g, b, a }
+                savedVariables[ForceInactive].Colour = { r, g, b, a }
                 UpdateColour()
+            end,
+        },
+        [16] = {
+            type = "dropdown",
+            name = "Font Name",
+            tooltip = "Font Name to be used.",
+            choices = {"Univers57", "Univers67", "Univers57", "FTN47", "FTN57", "FTN87", "ProseAntiquePSMT", "Handwritten_Bold", "TrajanPro-Regular"},
+            getFunc = function() return savedVariables[ForceInactive].fontName end,
+            setFunc = function(newValue)
+                savedVariables[ForceInactive].fontName = newValue
+                UpdateFont()
+            end,
+        },
+        [17] = {
+            type = "slider",
+            name = "Size",
+            tooltip = "Font Size to be used when warhorn is active.",
+            min = 20,
+            max = 72,
+            step = 1,
+            getFunc = function() return savedVariables[ForceInactive].fontSize end,
+            setFunc = function(newValue2)
+                savedVariables[ForceInactive].fontSize = newValue2
+                UpdateFont()
+            end,
+        },
+        [18] = {
+            type = "dropdown",
+            name = "Outline",
+            tooltip = "Font Outline to be used.",
+            choices = {"thick-outline", "soft-shadow-thick", "soft-shadow-thin", "none" },
+            getFunc = function() return savedVariables[ForceInactive].fontOutline or "none" end,
+            setFunc = function(newValue3)
+                if newValue == "none" then newValue3 = nil end
+                savedVariables[ForceInactive].fontOutline = newValue3
+                UpdateFont()
             end,
         },
     }
@@ -126,21 +259,10 @@ end
 ----------------------------------------------------------
 -- Display Functions  --
 ----------------------------------------------------------
-local function HornActiveDisplay()
-    hornState = "Active"
-    CanIHornIndicatorText:SetText("Warhorn is Active")
-    CanIHornIndicatorText:SetColor(unpack(savedVariables.HornActiveColour))
-end
-
-local function HornInactiveDisplay()
-    hornState = "Inactive"
-    CanIHornIndicatorText:SetText("Warhorn not Active")
-    CanIHornIndicatorText:SetColor(unpack(savedVariables.HornInactiveColour))
-end
-
-local function ForceInactiveDisplay()
-    hornState = "ForceInactive"
-    CanIHornIndicatorText:SetColor(unpack(savedVariables.ForceInactiveColour))
+local function HornDisplay()
+    CanIHornIndicatorText:SetFont("EsoUi/Common/Fonts/"..savedVariables[HornState].fontName..".otf|"..savedVariables[HornState].fontSize.."|"..savedVariables[HornState].fontOutline)
+    CanIHornIndicatorText:SetText(savedVariables[HornState].Text)
+    CanIHornIndicatorText:SetColor(unpack(savedVariables[HornState].Colour))
 end
 
 ----------------------------------------------------------
@@ -158,7 +280,8 @@ local function WatchForce(_, changeType, _, effectName, unitTag, _, _, _, _, _, 
         --d(string.format("Passed agressive warhorn true check"))
 
         if changeType == EFFECT_RESULT_FADED then
-            ForceInactiveDisplay()
+            HornState = "ForceInactive"
+            HornDisplay()
             --this changed the text colour to yellow when major force fades
             ForceHornActive = false
             --sets warhornActive back to false so other major forces don't change the colour
@@ -176,12 +299,13 @@ local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _,
     local nearbyHorn = IsUnitInGroupSupportRange(unitTag)
     if changeType == EFFECT_RESULT_GAINED then
         if nearbyHorn then
-            --d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
-            HornActiveDisplay()
+            --d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s effect gained", effectName, abilityId, unitTag))
+            HornState = "HornActive"
+            HornDisplay()
             --checks only for aggressive horn, as that is the only time we care about major force
                 if abilityId == 40224 then
                     ForceHornActive = true
-                    --d(string.format("WarhornActive set to true"))
+                    --d(string.format("ForceHornActive set to true"))
                     --sets WarhornActive to true to it will pass the check in the WatchForce function
                 end
             return
@@ -189,7 +313,8 @@ local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _,
     end
 
     --d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
-    HornInactiveDisplay()
+    HornState = "HornInactive"
+    HornDisplay()
 
     --d(string.format("IsHornOn() other effectName %s, abilityId %s, unitTag %s, changeType $s", effectName, abilityId, unitTag, changeType))
 end
@@ -235,10 +360,12 @@ local function CheckForHorn()
             end
     end
     if isActiveHorn then
-        HornActiveDisplay()
+        HornState = "HornActive"
+        HornDisplay()
         --d(string.format("CheckForHorn() It is it buffName: %s, abilityId %s, buffSlot %s", buffName, abilityID, buffSlot))
     else
-        HornInactiveDisplay()
+        HornState = "HornInactive"
+        HornDisplay()
     end
 end
 
@@ -246,6 +373,10 @@ end
 local function OnPlayerActivated()
     --d("it worked!")
     CheckForHorn()
+    if savedVariables.CurrentVersion ~= addon.version then
+        d(string.format(addon.DisplayName .. " - " ..addon.version .. " - " ..ChangeLog))
+        savedVariables.CurrentVersion = addon.version
+    end
 
 end
 
@@ -268,8 +399,9 @@ local function Initialize()
     RegisterForce()
     CreateSettingsWindow()
 
-
 end
+
+
 
 local function OnAddOnLoaded(_, addonName)
 
