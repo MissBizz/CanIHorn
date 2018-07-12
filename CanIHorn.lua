@@ -9,12 +9,12 @@ local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
 
 local addon = {
     name = "CanIHorn",
-    version = "1.2.1",
+    version = "1.2.2",
     author = "MissBizz",
     DisplayName = "Can I Horn?"
 }
 
-local ChangeLog = "MOAR OPTIONS! All warhorns states now have options for font/size/outline/colour! See changelog for other tidbits!"
+local ChangeLog = "Support Range Only tracking is now optional! Turning this off will ensure your addon reacts to any warhorn in the group (even if they are far far away)"
 
 local savedVariables
 
@@ -26,6 +26,7 @@ local HornState = ""
 local HornActive = "HornActive"
 local HornInactive = "HornInactive"
 local ForceInactive = "ForceInactive"
+local SupportRangeOnly
 
 local DisplayDefaults = {
     HornActive = {
@@ -49,7 +50,8 @@ local DisplayDefaults = {
         fontSize = "20",
         fontOutline = "soft-shadow-thick"
     },
-    CurrentVersion = "0"
+    CurrentVersion = "0",
+    SupportRangeOnly = true
 }
 
 
@@ -91,13 +93,31 @@ local function CreateSettingsWindow()
     local optionsData = {
         [1] = {
             type = "header",
-            name = "Warhorn Active",
+            name = "Support Range",
         },
         [2] = {
             type = "description",
-            text = "When warhorn is active. If using Aggressive horn, these settings will apply when both Aggressive Horn and Major Force are active.",
+            text = "When support range only is ON, the addon will only change states when someone within support range (~28m) of you gains the warhorn buff. Recommended on for split areas such as Hel Ra.",
         },
         [3] = {
+            type = "checkbox",
+            name = "Support Range Only",
+            tooltip = "A group member is considered in your support range if they are 'lit up' in the group frame",
+            getFunc = function() return savedVariables.SupportRangeOnly end,
+            setFunc = function(newValue)
+                savedVariables.SupportRangeOnly = newValue
+                SupportRangeOnly = newValue
+            end,
+        },
+        [4] = {
+            type = "header",
+            name = "Warhorn Active",
+        },
+        [5] = {
+            type = "description",
+            text = "When warhorn is active. If using Aggressive horn, these settings will apply when both Aggressive Horn and Major Force are active.",
+        },
+        [6] = {
             type = "colorpicker",
             name = "Horn Active Color",
             tooltip = "Changes the colour of the text when warhorn is active.",
@@ -107,18 +127,18 @@ local function CreateSettingsWindow()
                 UpdateColour()
             end,
         },
-        [4] = {
+        [7] = {
             type = "dropdown",
             name = "Font Name",
             tooltip = "Font Name to be used.",
-            choices = {"Univers57", "Univers67", "Univers57", "FTN47", "FTN57", "FTN87", "ProseAntiquePSMT", "Handwritten_Bold", "TrajanPro-Regular"},
+            choices = {"Univers57", "Univers67", "FTN47", "FTN57", "FTN87", "ProseAntiquePSMT", "Handwritten_Bold", "TrajanPro-Regular"},
             getFunc = function() return savedVariables[HornActive].fontName end,
             setFunc = function(newValue)
                 savedVariables[HornActive].fontName = newValue
                 UpdateFont()
             end,
         },
-        [5] = {
+        [8] = {
             type = "slider",
             name = "Size",
             tooltip = "Font Size to be used when warhorn is active.",
@@ -131,7 +151,7 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
-        [6] = {
+        [9] = {
             type = "dropdown",
             name = "Outline",
             tooltip = "Font Outline to be used.",
@@ -143,15 +163,15 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
-        [7] = {
+        [10] = {
             type = "header",
             name = "Warhorn Inactive",
         },
-        [8] = {
+        [11] = {
             type = "description",
             text = "When warhorn is not active.",
         },
-        [9] = {
+        [12] = {
             type = "colorpicker",
             name = "Horn Not Active Color",
             tooltip = "Changes the colour of the text when warhorn is not active.",
@@ -161,18 +181,18 @@ local function CreateSettingsWindow()
                 UpdateColour()
             end,
         },
-        [10] = {
+        [13] = {
             type = "dropdown",
             name = "Font Name",
             tooltip = "Font Name to be used.",
-            choices = {"Univers57", "Univers67", "Univers57", "FTN47", "FTN57", "FTN87", "ProseAntiquePSMT", "Handwritten_Bold", "TrajanPro-Regular"},
+            choices = {"Univers57", "Univers67", "FTN47", "FTN57", "FTN87", "ProseAntiquePSMT", "Handwritten_Bold", "TrajanPro-Regular"},
             getFunc = function() return savedVariables[HornInactive].fontName end,
             setFunc = function(newValue)
                 savedVariables[HornInactive].fontName = newValue
                 UpdateFont()
             end,
         },
-        [11] = {
+        [14] = {
             type = "slider",
             name = "Size",
             tooltip = "Font Size to be used when warhorn is active.",
@@ -185,7 +205,7 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
-        [12] = {
+        [15] = {
             type = "dropdown",
             name = "Outline",
             tooltip = "Font Outline to be used.",
@@ -197,15 +217,15 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
-        [13] = {
+        [16] = {
             type = "header",
             name = "Warhorn Active, Major Force Inactive",
         },
-        [14] = {
+        [17] = {
             type = "description",
             text = "When warhorn is active, but Major Force is no longer active. Only applied to Aggressive Horn.",
         },
-        [15] = {
+        [18] = {
             type = "colorpicker",
             name = "Horn Active - No Major Force",
             tooltip = "Changes the colour of the text when warhorn is active, but major force is lost. (Does not apply for unmorphed warhorn or sturdy horn)",
@@ -215,18 +235,18 @@ local function CreateSettingsWindow()
                 UpdateColour()
             end,
         },
-        [16] = {
+        [19] = {
             type = "dropdown",
             name = "Font Name",
             tooltip = "Font Name to be used.",
-            choices = {"Univers57", "Univers67", "Univers57", "FTN47", "FTN57", "FTN87", "ProseAntiquePSMT", "Handwritten_Bold", "TrajanPro-Regular"},
+            choices = {"Univers57", "Univers67", "FTN47", "FTN57", "FTN87", "ProseAntiquePSMT", "Handwritten_Bold", "TrajanPro-Regular"},
             getFunc = function() return savedVariables[ForceInactive].fontName end,
             setFunc = function(newValue)
                 savedVariables[ForceInactive].fontName = newValue
                 UpdateFont()
             end,
         },
-        [17] = {
+        [20] = {
             type = "slider",
             name = "Size",
             tooltip = "Font Size to be used when warhorn is active.",
@@ -239,7 +259,7 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
-        [18] = {
+        [21] = {
             type = "dropdown",
             name = "Outline",
             tooltip = "Font Outline to be used.",
@@ -298,20 +318,31 @@ end
 local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _, _, _, _, _, abilityId, _)
     local nearbyHorn = IsUnitInGroupSupportRange(unitTag)
     if changeType == EFFECT_RESULT_GAINED then
-        if nearbyHorn then
-            --d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s effect gained", effectName, abilityId, unitTag))
-            HornState = "HornActive"
-            HornDisplay()
-            --checks only for aggressive horn, as that is the only time we care about major force
-                if abilityId == 40224 then
+        if SupportRangeOnly then
+            if nearbyHorn then
+                --d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s effect gained", effectName, abilityId, unitTag))
+                HornState = "HornActive"
+                HornDisplay()
+                --checks only for aggressive horn, as that is the only time we care about major force
+                    if abilityId == 40224 then
                     ForceHornActive = true
                     --d(string.format("ForceHornActive set to true"))
                     --sets WarhornActive to true to it will pass the check in the WatchForce function
-                end
-            return
+                    end
+                return
+            end
+        elseif SupportRangeOnly == false then
+            HornState = "HornActive"
+            HornDisplay()
+            --checks only for aggressive horn, as that is the only time we care about major force
+            if abilityId == 40224 then
+                ForceHornActive = true
+                --d(string.format("ForceHornActive set to true"))
+                --sets WarhornActive to true to it will pass the check in the WatchForce function
+                return
+            end
         end
     end
-
     --d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
     HornState = "HornInactive"
     HornDisplay()
