@@ -19,6 +19,7 @@ local ChangeLog = "Support Range Only tracking is now optional! Turning this off
 local savedVariables
 
 
+
 ----------------------------------------------------------
 --  GLOBALS / GUI  --
 ----------------------------------------------------------
@@ -404,6 +405,7 @@ end
 local function OnPlayerActivated()
     --d("it worked!")
     CheckForHorn()
+
     if savedVariables.CurrentVersion ~= addon.version then
         d(string.format(addon.DisplayName .. " - " ..addon.version .. " - " ..ChangeLog))
         savedVariables.CurrentVersion = addon.version
@@ -429,6 +431,10 @@ local function Initialize()
     RegisterFilterAbilities()
     RegisterForce()
     CreateSettingsWindow()
+    local fragment = ZO_HUDFadeSceneFragment:New(CanIHornIndicator)
+    HUD_SCENE:AddFragment(fragment)
+    HUD_UI_SCENE:AddFragment(fragment)
+    GAME_MENU_SCENE:AddFragment(fragment)
 
 end
 
