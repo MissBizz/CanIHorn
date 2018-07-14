@@ -14,7 +14,7 @@ local addon = {
     DisplayName = "Can I Horn?"
 }
 
-local ChangeLog = "Support Range Only tracking is now optional! Turning this off will ensure your addon reacts to any warhorn in the group (even if they are far far away)"
+local ChangeLog = "Support Range Only tracking is now optional! Turning this off will ensure your addon reacts to any warhorn in the group (even if they are far far away). Now hides when not using HUD"
 
 local savedVariables
 
