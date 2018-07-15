@@ -9,16 +9,14 @@ local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
 
 local addon = {
     name = "CanIHorn",
-    version = "1.2.2",
+    version = "1.2.3",
     author = "MissBizz",
     DisplayName = "Can I Horn?"
 }
 
-local ChangeLog = "Support Range Only tracking is now optional! Turning this off will ensure your addon reacts to any warhorn in the group (even if they are far far away). Now hides when not using HUD"
+local ChangeLog = "Reset saved variables to hopefully fix weird bug. Go make your changes again!"
 
 local savedVariables
-
-
 
 ----------------------------------------------------------
 --  GLOBALS / GUI  --
@@ -27,7 +25,7 @@ local HornState = ""
 local HornActive = "HornActive"
 local HornInactive = "HornInactive"
 local ForceInactive = "ForceInactive"
-local SupportRangeOnly
+local SupportRangeOnly = true
 
 local DisplayDefaults = {
     HornActive = {
@@ -313,42 +311,50 @@ end
 ----------------------------------------------------------
 -- Main Horn Functions  --
 ----------------------------------------------------------
-
+local nearbyHorn
 -- (_, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitID, abilityId, sourceUnitType)
 --This is our main function to change text when a warhorn fires or fades.
 local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _, _, _, _, _, abilityId, _)
-    local nearbyHorn = IsUnitInGroupSupportRange(unitTag)
+    nearbyHorn = IsUnitInGroupSupportRange(unitTag)
     if changeType == EFFECT_RESULT_GAINED then
+        d(string.format("Horn found. Unit:%s,", unitTag))
         if SupportRangeOnly then
+            d(string.format("SRO true passed"))
             if nearbyHorn then
-                --d(string.format("IsHornOn() gained effectName: %s, abilityId %s, unitTag %s effect gained", effectName, abilityId, unitTag))
+                d(string.format("nearby horn found"))
                 HornState = "HornActive"
                 HornDisplay()
                 --checks only for aggressive horn, as that is the only time we care about major force
                     if abilityId == 40224 then
                     ForceHornActive = true
-                    --d(string.format("ForceHornActive set to true"))
+                    d(string.format("ForceHornActive set to true SRO true"))
                     --sets WarhornActive to true to it will pass the check in the WatchForce function
                     end
                 return
             end
+            end
         elseif SupportRangeOnly == false then
+        d(string.format("far horn found"))
             HornState = "HornActive"
             HornDisplay()
             --checks only for aggressive horn, as that is the only time we care about major force
             if abilityId == 40224 then
                 ForceHornActive = true
-                --d(string.format("ForceHornActive set to true"))
-                --sets WarhornActive to true to it will pass the check in the WatchForce function
+                d(string.format("ForceHornActive set to true for SRO false"))
+                --sets WarhornActi
+                -- -- ve to true to it will pass the check in the WatchForce function
                 return
             end
-        end
-    end
+
+
+    else
     --d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
     HornState = "HornInactive"
     HornDisplay()
+    d(string.format("HornInactive"))
 
     --d(string.format("IsHornOn() other effectName %s, abilityId %s, unitTag %s, changeType $s", effectName, abilityId, unitTag, changeType))
+        end
 end
 --------------------------------------------------
 -- Warhorn ID's  --
@@ -424,7 +430,7 @@ local function Initialize()
     --register event to watch for when player loads
     EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 
-    savedVariables = ZO_SavedVars:New("CanIHornSavedVariables", 1, nil, DisplayDefaults)
+    savedVariables = ZO_SavedVars:New("CanIHornSavedVariables", 2, nil, DisplayDefaults)
 
     addon.RestorePosition()
 
