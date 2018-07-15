@@ -317,30 +317,30 @@ local nearbyHorn
 local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _, _, _, _, _, abilityId, _)
     nearbyHorn = IsUnitInGroupSupportRange(unitTag)
     if changeType == EFFECT_RESULT_GAINED then
-        d(string.format("Horn found. Unit:%s,", unitTag))
+        --d(string.format("Horn found. Unit:%s,", unitTag))
         if SupportRangeOnly then
-            d(string.format("SRO true passed"))
+            --d(string.format("SRO true passed"))
             if nearbyHorn then
-                d(string.format("nearby horn found"))
+                --d(string.format("nearby horn found"))
                 HornState = "HornActive"
                 HornDisplay()
                 --checks only for aggressive horn, as that is the only time we care about major force
                     if abilityId == 40224 then
                     ForceHornActive = true
-                    d(string.format("ForceHornActive set to true SRO true"))
+                    --d(string.format("ForceHornActive set to true SRO true"))
                     --sets WarhornActive to true to it will pass the check in the WatchForce function
                     end
                 return
             end
             end
         elseif SupportRangeOnly == false then
-        d(string.format("far horn found"))
+        --d(string.format("far horn found"))
             HornState = "HornActive"
             HornDisplay()
             --checks only for aggressive horn, as that is the only time we care about major force
             if abilityId == 40224 then
                 ForceHornActive = true
-                d(string.format("ForceHornActive set to true for SRO false"))
+                --d(string.format("ForceHornActive set to true for SRO false"))
                 --sets WarhornActi
                 -- -- ve to true to it will pass the check in the WatchForce function
                 return
@@ -351,7 +351,7 @@ local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _,
     --d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
     HornState = "HornInactive"
     HornDisplay()
-    d(string.format("HornInactive"))
+    --d(string.format("HornInactive"))
 
     --d(string.format("IsHornOn() other effectName %s, abilityId %s, unitTag %s, changeType $s", effectName, abilityId, unitTag, changeType))
         end
