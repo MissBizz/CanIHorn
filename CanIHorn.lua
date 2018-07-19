@@ -9,12 +9,12 @@ local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
 
 local addon = {
     name = "CanIHorn",
-    version = "1.2.3",
+    version = "1.2.4",
     author = "MissBizz",
     DisplayName = "Can I Horn?"
 }
 
-local ChangeLog = "Reset saved variables to hopefully fix weird bug. Go make your changes again!"
+local ChangeLog = "Indicator only shows while in a group!"
 
 local savedVariables
 
@@ -204,6 +204,7 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
+        
         [15] = {
             type = "dropdown",
             name = "Outline",
@@ -283,6 +284,23 @@ local function HornDisplay()
     CanIHornIndicatorText:SetText(savedVariables[HornState].Text)
     CanIHornIndicatorText:SetColor(unpack(savedVariables[HornState].Colour))
 end
+
+local function Indicator()
+    local playerName = GetUnitName("player")
+    local isinGroup = IsPlayerInGroup(playerName)
+    d(string.format("playerName: %s", playerName))
+
+    if isinGroup then
+    CanIHornIndicatorText:SetHidden(false)
+        d("is in group")
+
+    elseif isinGroup == false then
+        CanIHornIndicatorText:SetHidden(true)
+        d("is not in group")
+
+    end
+end
+
 
 ----------------------------------------------------------
 -- Major Force Functions  --
@@ -381,7 +399,6 @@ local function RegisterForce()
     EVENT_MANAGER:RegisterForEvent(forceevent, EVENT_EFFECT_CHANGED, WatchForce)
     EVENT_MANAGER:AddFilterForEvent(forceevent, EVENT_EFFECT_CHANGED, REGISTER_FILTER_ABILITY_ID, 40225, REGISTER_FILTER_UNIT_TAG_PREFIX, "group")
 end
-
 --------------------------------------------------
 -- Initial Horn Check  --
 ----------------------------------------------------------
@@ -411,6 +428,7 @@ end
 local function OnPlayerActivated()
     --d("it worked!")
     CheckForHorn()
+    Indicator()
 
     if savedVariables.CurrentVersion ~= addon.version then
         d(string.format(addon.DisplayName .. " - " ..addon.version .. " - " ..ChangeLog))
@@ -464,3 +482,6 @@ end
 ----------------------------------------------------------
 --This registers our event, so whenever EVENT_ADD_ON_LOADED fires, it runs our OnAddOnLoaded function
 EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+--Events for when we join/leave groups so the indicator knows to show or not
+EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_GROUP_MEMBER_JOINED, Indicator)
+EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_GROUP_MEMBER_LEFT, Indicator)
