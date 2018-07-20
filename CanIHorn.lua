@@ -14,7 +14,7 @@ local addon = {
     DisplayName = "Can I Horn?"
 }
 
-local ChangeLog = "Indicator only shows while in a group!"
+local ChangeLog = "Indicator only shows while in a group! You can force the indicator to show all the time in settings"
 
 local savedVariables
 
@@ -26,6 +26,7 @@ local HornActive = "HornActive"
 local HornInactive = "HornInactive"
 local ForceInactive = "ForceInactive"
 local SupportRangeOnly = true
+local IndicatorHidden = function() return savedVariables.IndicatorHidden end
 
 local DisplayDefaults = {
     HornActive = {
@@ -50,7 +51,8 @@ local DisplayDefaults = {
         fontOutline = "soft-shadow-thick"
     },
     CurrentVersion = "0",
-    SupportRangeOnly = true
+    SupportRangeOnly = true,
+    IndicatorHidden = true
 }
 
 
@@ -109,14 +111,25 @@ local function CreateSettingsWindow()
             end,
         },
         [4] = {
+            type = "checkbox",
+            name = "Show Indicator All The Time",
+            tooltip = "Force the indicator to show when not in a group so you can adjust settings!",
+            getFunc = function() return savedVariables.IndicatorHidden end,
+            setFunc = function(newValue)
+                savedVariables.IndicatorHidden = newValue
+                CanIHornIndicatorText:SetHidden(not newValue)
+                IndicatorHidden = not newValue
+            end,
+        },
+        [5] = {
             type = "header",
             name = "Warhorn Active",
         },
-        [5] = {
+        [6] = {
             type = "description",
             text = "When warhorn is active. If using Aggressive horn, these settings will apply when both Aggressive Horn and Major Force are active.",
         },
-        [6] = {
+        [7] = {
             type = "colorpicker",
             name = "Horn Active Color",
             tooltip = "Changes the colour of the text when warhorn is active.",
@@ -126,7 +139,7 @@ local function CreateSettingsWindow()
                 UpdateColour()
             end,
         },
-        [7] = {
+        [8] = {
             type = "dropdown",
             name = "Font Name",
             tooltip = "Font Name to be used.",
@@ -137,7 +150,7 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
-        [8] = {
+        [9] = {
             type = "slider",
             name = "Size",
             tooltip = "Font Size to be used when warhorn is active.",
@@ -150,7 +163,7 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
-        [9] = {
+        [10] = {
             type = "dropdown",
             name = "Outline",
             tooltip = "Font Outline to be used.",
@@ -162,15 +175,15 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
-        [10] = {
+        [11] = {
             type = "header",
             name = "Warhorn Inactive",
         },
-        [11] = {
+        [12] = {
             type = "description",
             text = "When warhorn is not active.",
         },
-        [12] = {
+        [13] = {
             type = "colorpicker",
             name = "Horn Not Active Color",
             tooltip = "Changes the colour of the text when warhorn is not active.",
@@ -180,7 +193,7 @@ local function CreateSettingsWindow()
                 UpdateColour()
             end,
         },
-        [13] = {
+        [14] = {
             type = "dropdown",
             name = "Font Name",
             tooltip = "Font Name to be used.",
@@ -191,7 +204,7 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
-        [14] = {
+        [15] = {
             type = "slider",
             name = "Size",
             tooltip = "Font Size to be used when warhorn is active.",
@@ -205,7 +218,7 @@ local function CreateSettingsWindow()
             end,
         },
         
-        [15] = {
+        [16] = {
             type = "dropdown",
             name = "Outline",
             tooltip = "Font Outline to be used.",
@@ -217,15 +230,15 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
-        [16] = {
+        [17] = {
             type = "header",
             name = "Warhorn Active, Major Force Inactive",
         },
-        [17] = {
+        [18] = {
             type = "description",
             text = "When warhorn is active, but Major Force is no longer active. Only applied to Aggressive Horn.",
         },
-        [18] = {
+        [19] = {
             type = "colorpicker",
             name = "Horn Active - No Major Force",
             tooltip = "Changes the colour of the text when warhorn is active, but major force is lost. (Does not apply for unmorphed warhorn or sturdy horn)",
@@ -235,7 +248,7 @@ local function CreateSettingsWindow()
                 UpdateColour()
             end,
         },
-        [19] = {
+        [20] = {
             type = "dropdown",
             name = "Font Name",
             tooltip = "Font Name to be used.",
@@ -246,7 +259,7 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
-        [20] = {
+        [21] = {
             type = "slider",
             name = "Size",
             tooltip = "Font Size to be used when warhorn is active.",
@@ -259,7 +272,7 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
-        [21] = {
+        [22] = {
             type = "dropdown",
             name = "Outline",
             tooltip = "Font Outline to be used.",
@@ -290,14 +303,13 @@ local function Indicator()
     local isinGroup = IsPlayerInGroup(playerName)
     d(string.format("playerName: %s", playerName))
 
-    if isinGroup then
+    if IndicatorHidden and isinGroup then
     CanIHornIndicatorText:SetHidden(false)
-        d("is in group")
+        d("is in group, indicator was off")
 
-    elseif isinGroup == false then
+    elseif IndicatorHidden and isinGroup == false then
         CanIHornIndicatorText:SetHidden(true)
         d("is not in group")
-
     end
 end
 
