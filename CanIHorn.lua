@@ -9,7 +9,7 @@ local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
 
 local addon = {
     name = "CanIHorn",
-    version = "1.2.4",
+    version = "1.3.0",
     author = "MissBizz",
     DisplayName = "Can I Horn?"
 }
