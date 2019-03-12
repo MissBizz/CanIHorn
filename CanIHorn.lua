@@ -9,14 +9,28 @@ local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
 
 local addon = {
     name = "CanIHorn",
-    version = "1.2.3",
+    version = "1.4.0",
     author = "MissBizz",
     DisplayName = "Can I Horn?"
 }
 
-local ChangeLog = "Reset saved variables to hopefully fix weird bug. Go make your changes again!"
+local ChangeLog = "Option for text to only show during combat!"
 
 local savedVariables
+
+function addon.onPlayerCombatState (eventCode, inCombat)
+    if savedVariables.showOnlyInCombat then
+        local show = not IsUnitInCombat("player")
+        if CanIHornIndicatorText:IsHidden() ~= show then
+            CanIHornIndicatorText:SetHidden(show)
+        end
+    else
+        if CanIHornIndicatorText:IsHidden() then
+            CanIHornIndicatorText:SetHidden(false)
+        end
+    end
+end
+
 
 ----------------------------------------------------------
 --  GLOBALS / GUI  --
@@ -26,6 +40,17 @@ local HornActive = "HornActive"
 local HornInactive = "HornInactive"
 local ForceInactive = "ForceInactive"
 local SupportRangeOnly = true
+local showOnlyInCombat = false
+
+function addon.CombatStateDisplay()
+    if IsUnitInCombat("player") and savedvariables.showOnlyInCombat then
+        CanIHornIndicatorText:SetHidden(false)
+    elseif savedVariables.showOnlyInCombat and IsUnitInCombat("player") == false then
+        CanIHornIndicatorText:SetHidden(true)
+    else
+        CanIHornIndicatorText:SetHidden(false)
+    end
+end
 
 local DisplayDefaults = {
     HornActive = {
@@ -50,12 +75,14 @@ local DisplayDefaults = {
         fontOutline = "soft-shadow-thick"
     },
     CurrentVersion = "0",
-    SupportRangeOnly = true
+    SupportRangeOnly = true,
+    isLocked = false,
+    showOnlyInCombat = false
 }
 
 
 local function UpdateColour()
-        CanIHornIndicatorText:SetColor(unpack(savedVariables[HornState].Colour))
+    CanIHornIndicatorText:SetColor(unpack(savedVariables[HornState].Colour))
 end
 
 local function UpdateFont()
@@ -72,6 +99,8 @@ function addon.RestorePosition()
     CanIHornIndicator:ClearAnchors()
     CanIHornIndicator:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, savedVariables.left, savedVariables.top)
 end
+
+
 
 CAN_I_HORN = addon
 
@@ -270,6 +299,31 @@ local function CreateSettingsWindow()
                 UpdateFont()
             end,
         },
+        [22] = {
+            type = "header",
+            name = "Visibility",
+        },
+        [23] = {
+            type = "checkbox",
+            name = "Lock",
+            tooltip = "Locks the current position of the text!",
+            getFunc = function() return savedVariables.isLocked end,
+            setFunc = function(isLocked)
+                savedVariables.isLocked = isLocked
+                CanIHornIndicator:SetMouseEnabled(not isLocked)
+            end,
+        },
+        [24] = {
+            type = "checkbox",
+            name = "Show only in combat",
+            tooltip = "Shows the text only when in combat. ",
+            getFunc = function() return savedVariables.showOnlyInCombat end,
+            setFunc = function(value4)
+                showOnlyInCombat = value4
+                savedVariables.showOnlyInCombat = value4
+                addon.CombatStateDisplay()
+            end,
+        },
     }
 
     LAM2:RegisterOptionControls("MissBizz_CanIHorn", optionsData)
@@ -305,7 +359,7 @@ local function WatchForce(_, changeType, _, effectName, unitTag, _, _, _, _, _, 
             ForceHornActive = false
             --sets warhornActive back to false so other major forces don't change the colour
         end
-   end
+    end
 end
 
 ----------------------------------------------------------
@@ -325,36 +379,36 @@ local function IsHornOn(_, changeType, _, effectName, unitTag, _, _, _, _, _, _,
                 HornState = "HornActive"
                 HornDisplay()
                 --checks only for aggressive horn, as that is the only time we care about major force
-                    if abilityId == 40224 then
+                if abilityId == 40224 then
                     ForceHornActive = true
                     --d(string.format("ForceHornActive set to true SRO true"))
                     --sets WarhornActive to true to it will pass the check in the WatchForce function
-                    end
+                end
                 return
             end
-            end
-        elseif SupportRangeOnly == false then
+        end
+    elseif SupportRangeOnly == false then
         --d(string.format("far horn found"))
-            HornState = "HornActive"
-            HornDisplay()
-            --checks only for aggressive horn, as that is the only time we care about major force
-            if abilityId == 40224 then
-                ForceHornActive = true
-                --d(string.format("ForceHornActive set to true for SRO false"))
-                --sets WarhornActi
-                -- -- ve to true to it will pass the check in the WatchForce function
-                return
-            end
+        HornState = "HornActive"
+        HornDisplay()
+        --checks only for aggressive horn, as that is the only time we care about major force
+        if abilityId == 40224 then
+            ForceHornActive = true
+            --d(string.format("ForceHornActive set to true for SRO false"))
+            --sets WarhornActi
+            -- -- ve to true to it will pass the check in the WatchForce function
+            return
+        end
 
 
     else
-    --d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
-    HornState = "HornInactive"
-    HornDisplay()
-    --d(string.format("HornInactive"))
+        --d(string.format("IsHornOn() effectName: %s, abilityId %s, unitTag %s", effectName, abilityId, unitTag))
+        HornState = "HornInactive"
+        HornDisplay()
+        --d(string.format("HornInactive"))
 
-    --d(string.format("IsHornOn() other effectName %s, abilityId %s, unitTag %s, changeType $s", effectName, abilityId, unitTag, changeType))
-        end
+        --d(string.format("IsHornOn() other effectName %s, abilityId %s, unitTag %s, changeType $s", effectName, abilityId, unitTag, changeType))
+    end
 end
 --------------------------------------------------
 -- Warhorn ID's  --
@@ -392,10 +446,10 @@ local function CheckForHorn()
 
     for i=1,GetNumBuffs("player") do
         local abilityId = select(11, GetUnitBuffInfo("player", i))
-            if hornID[abilityID] then
-                isActiveHorn = true
-                    break
-            end
+        if hornID[abilityID] then
+            isActiveHorn = true
+            break
+        end
     end
     if isActiveHorn then
         HornState = "HornActive"
@@ -407,10 +461,12 @@ local function CheckForHorn()
     end
 end
 
+
 --waits until the player is activated to check for horn
 local function OnPlayerActivated()
     --d("it worked!")
     CheckForHorn()
+    addon.CombatStateDisplay()
 
     if savedVariables.CurrentVersion ~= addon.version then
         d(string.format(addon.DisplayName .. " - " ..addon.version .. " - " ..ChangeLog))
@@ -464,3 +520,4 @@ end
 ----------------------------------------------------------
 --This registers our event, so whenever EVENT_ADD_ON_LOADED fires, it runs our OnAddOnLoaded function
 EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_PLAYER_COMBAT_STATE, addon.onPlayerCombatState)
