@@ -14,10 +14,34 @@ local addon = {
     DisplayName = "Can I Horn?"
 }
 
-local ChangeLog = "Option for text to only show during combat!"
+local ChangeLog = "Option for text to only show during combat and/or while grouped!"
 
 local savedVariables
 
+
+----------------------------------------------------------
+--  GLOBALS / GUI  --
+----------------------------------------------------------
+local HornState = ""
+local HornActive = "HornActive"
+local HornInactive = "HornInactive"
+local ForceInactive = "ForceInactive"
+local SupportRangeOnly = true
+local showOnlyInCombat = false
+local showOnlyGrouped = false
+
+
+function addon.groupVisibility (_,_)
+    if savedVariables.showOnlyGrouped and IsUnitGrouped("player") then
+        CanIHornIndicatorText:SetHidden(false)
+    elseif savedVariables.showOnlyGrouped and IsUnitGrouped("player") == false then
+        CanIHornIndicatorText:SetHidden(true)
+    elseif savedVariables.showOnlyGrouped == false and savedVariables.showOnlyInCombat then
+        addon.onPlayerCombatState()
+    elseif savedVariables.showOnlyGrouped == false and savedVariables.showOnlyInCombat == false then
+        CanIHornIndicatorText:SetHidden(false)
+    end
+end
 function addon.onPlayerCombatState (eventCode, inCombat)
     if savedVariables.showOnlyInCombat then
         local show = not IsUnitInCombat("player")
@@ -30,17 +54,6 @@ function addon.onPlayerCombatState (eventCode, inCombat)
         end
     end
 end
-
-
-----------------------------------------------------------
---  GLOBALS / GUI  --
-----------------------------------------------------------
-local HornState = ""
-local HornActive = "HornActive"
-local HornInactive = "HornInactive"
-local ForceInactive = "ForceInactive"
-local SupportRangeOnly = true
-local showOnlyInCombat = false
 
 function addon.CombatStateDisplay()
     if IsUnitInCombat("player") and savedvariables.showOnlyInCombat then
@@ -324,6 +337,17 @@ local function CreateSettingsWindow()
                 addon.CombatStateDisplay()
             end,
         },
+        [25] = {
+            type = "checkbox",
+            name = "Show only while grouped",
+            tooltip = "Shows the text only when in a group. ",
+            getFunc = function() return savedVariables.showOnlyGrouped end,
+            setFunc = function(value5)
+                showOnlyGrouped = value5
+                savedVariables.showOnlyGrouped = value5
+                addon.groupVisibility()
+            end,
+        },
     }
 
     LAM2:RegisterOptionControls("MissBizz_CanIHorn", optionsData)
@@ -467,6 +491,7 @@ local function OnPlayerActivated()
     --d("it worked!")
     CheckForHorn()
     addon.CombatStateDisplay()
+    addon.groupVisibility()
 
     if savedVariables.CurrentVersion ~= addon.version then
         d(string.format(addon.DisplayName .. " - " ..addon.version .. " - " ..ChangeLog))
@@ -521,3 +546,5 @@ end
 --This registers our event, so whenever EVENT_ADD_ON_LOADED fires, it runs our OnAddOnLoaded function
 EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_PLAYER_COMBAT_STATE, addon.onPlayerCombatState)
+EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_GROUP_MEMBER_JOINED, addon.groupVisibility)
+EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_GROUP_MEMBER_LEFT, addon.groupVisibility)
